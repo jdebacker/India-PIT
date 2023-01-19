@@ -171,7 +171,7 @@ class Calculator(object):
         # For now, don't zero out for corporate
         # pdb.set_trace()
         # Corporate calculations
-        
+
         net_rental_income(self.__policy, self.__corprecords)
         depreciation_PM(self.__policy, self.__corprecords)
         corp_income_business_profession(self.__policy, self.__corprecords)
@@ -187,7 +187,7 @@ class Calculator(object):
         tax_ltcg_splrate(self.__policy, self.__corprecords)
         tax_specialrates(self.__policy, self.__corprecords)
         cit_liability(self.__policy, self.__corprecords)
-        
+
         # Individual calculations
         net_salary_income(self.__policy, self.__records)
         net_rental_income(self.__policy, self.__records)
@@ -585,17 +585,14 @@ class Calculator(object):
         del calc_var_dataframe
         return diff
 
-    MTR_VALID_VARIABLES = ['e00200p', 'e00200s',
-                           'e00900p', 'e00300',
-                           'e00400', 'e00600',
-                           'e00650', 'e01400',
-                           'e01700', 'e02000',
-                           'e02400', 'p22250',
-                           'p23250', 'e18500',
-                           'e19200', 'e26270',
-                           'e19800', 'e20100']
+    MTR_VALID_VARIABLES = [
+        'SALARIES', 'INCOME_HP', 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS',
+        'PRFT_GAIN_BP_SPECLTV_BUS', 'PRFT_GAIN_BP_SPCFD_BUS',
+        'PRFT_GAIN_BP_INC_115BBF', 'ST_CG_AMT_1', 'ST_CG_AMT_2',
+        'ST_CG_AMT_APPRATE',  'LT_CG_AMT_1', 'LT_CG_AMT_2',
+        'TOTAL_INCOME_OS']
 
-    def mtr(self, variable_str='e00200p',
+    def mtr(self, variable_str='SALARIES',
             negative_finite_diff=False,
             zero_out_calculated_vars=False,
             calc_all_already_called=False,
@@ -661,25 +658,7 @@ class Calculator(object):
         The arguments zero_out_calculated_vars and calc_all_already_called
         cannot both be true.
 
-        Valid variable_str values are:
-        'e00200p', taxpayer wage/salary earnings (also included in e00200);
-        'e00200s', spouse wage/salary earnings (also included in e00200);
-        'e00900p', taxpayer Schedule C self-employment income (also in e00900);
-        'e00300',  taxable interest income;
-        'e00400',  federally-tax-exempt interest income;
-        'e00600',  all dividends included in AGI
-        'e00650',  qualified dividends (also included in e00600)
-        'e01400',  federally-taxable IRA distribution;
-        'e01700',  federally-taxable pension benefits;
-        'e02000',  Schedule E total net income/loss
-        'e02400',  all social security (OASDI) benefits;
-        'p22250',  short-term capital gains;
-        'p23250',  long-term capital gains;
-        'e18500',  Schedule A real-estate-tax paid;
-        'e19200',  Schedule A interest paid;
-        'e26270',  S-corporation/partnership income (also included in e02000);
-        'e19800',  Charity cash contributions;
-        'e20100',  Charity non-cash contributions.
+        Valid variable_str values are listed above.
         """
         # pylint: disable=too-many-arguments,too-many-statements
         # pylint: disable=too-many-locals,too-many-branches
@@ -689,92 +668,47 @@ class Calculator(object):
             msg = 'mtr variable_str="{}" is not valid'
             raise ValueError(msg.format(variable_str))
         # specify value for finite_diff parameter
-        finite_diff = 0.01  # a one-cent difference
+        finite_diff = 1.0  # a one-rupee difference
         if negative_finite_diff:
             finite_diff *= -1.0
         # remember records object in order to restore it after mtr computations
         self.store_records()
         # extract variable array(s) from embedded records object
         variable = self.array(variable_str)
-        if variable_str == 'e00200p':
-            earnings_var = self.array('e00200')
-        elif variable_str == 'e00200s':
-            earnings_var = self.array('e00200')
-        elif variable_str == 'e00900p':
-            seincome_var = self.array('e00900')
-        elif variable_str == 'e00650':
-            divincome_var = self.array('e00600')
-        elif variable_str == 'e26270':
-            sche_income_var = self.array('e02000')
+        if variable_str == 'SALARIES':
+            earnings_var = self.array('SALARIES')
+        elif variable_str == 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS':
+            seincome_var = self.array('PRFT_GAIN_BP_OTHR_SPECLTV_BUS')
         # calculate level of taxes after a marginal increase in income
         self.array(variable_str, variable + finite_diff)
-        if variable_str == 'e00200p':
-            self.array('e00200', earnings_var + finite_diff)
-        elif variable_str == 'e00200s':
-            self.array('e00200', earnings_var + finite_diff)
-        elif variable_str == 'e00900p':
-            self.array('e00900', seincome_var + finite_diff)
-        elif variable_str == 'e00650':
-            self.array('e00600', divincome_var + finite_diff)
-        elif variable_str == 'e26270':
-            self.array('e02000', sche_income_var + finite_diff)
-        self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
-        payrolltax_chng = self.array('payrolltax')
-        incometax_chng = self.array('iitax')
-        combined_taxes_chng = incometax_chng + payrolltax_chng
+        if variable_str == 'SALARIES':
+            self.array('SALARIES', earnings_var + finite_diff)
+        elif variable_str == 'SALARIES':
+            self.array('SALARIES', earnings_var + finite_diff)
+        elif variable_str == 'SALARIES':
+            self.array('SALARIES', seincome_var + finite_diff)
+        # self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
+        pitax_chng = self.array('pitax')
         # calculate base level of taxes after restoring records object
         self.restore_records()
-        if not calc_all_already_called or zero_out_calculated_vars:
-            self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
-        payrolltax_base = self.array('payrolltax')
-        incometax_base = self.array('iitax')
-        combined_taxes_base = incometax_base + payrolltax_base
+        # if not calc_all_already_called or zero_out_calculated_vars:
+        #     self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
+        pitax_base = self.array('pitax')
         # compute marginal changes in combined tax liability
-        payrolltax_diff = payrolltax_chng - payrolltax_base
-        incometax_diff = incometax_chng - incometax_base
-        combined_diff = combined_taxes_chng - combined_taxes_base
-        # specify optional adjustment for employer (er) OASDI+HI payroll taxes
-        mtr_on_earnings = (variable_str == 'e00200p' or
-                           variable_str == 'e00200s')
-        if wrt_full_compensation and mtr_on_earnings:
-            adj = np.where(variable < self.policy_param('SS_Earnings_c'),
-                           0.5 * (self.policy_param('FICA_ss_trt') +
-                                  self.policy_param('FICA_mc_trt')),
-                           0.5 * self.policy_param('FICA_mc_trt'))
-        else:
-            adj = 0.0
+        pitax_diff = pitax_chng - pitax_base
         # compute marginal tax rates
-        mtr_payrolltax = payrolltax_diff / (finite_diff * (1.0 + adj))
-        mtr_incometax = incometax_diff / (finite_diff * (1.0 + adj))
-        mtr_combined = combined_diff / (finite_diff * (1.0 + adj))
-        # if variable_str is e00200s, set MTR to NaN for units without a spouse
-        if variable_str == 'e00200s':
-            mars = self.array('MARS')
-            mtr_payrolltax = np.where(mars == 2, mtr_payrolltax, np.nan)
-            mtr_incometax = np.where(mars == 2, mtr_incometax, np.nan)
-            mtr_combined = np.where(mars == 2, mtr_combined, np.nan)
+        mtr_pitax = pitax_diff / finite_diff
         # delete intermediate variables
         del variable
-        if variable_str == 'e00200p' or variable_str == 'e00200s':
+        if variable_str == 'SALARIES':
             del earnings_var
-        elif variable_str == 'e00900p':
+        elif variable_str == 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS':
             del seincome_var
-        elif variable_str == 'e00650':
-            del divincome_var
-        elif variable_str == 'e26270':
-            del sche_income_var
-        del payrolltax_chng
-        del incometax_chng
-        del combined_taxes_chng
-        del payrolltax_base
-        del incometax_base
-        del combined_taxes_base
-        del payrolltax_diff
-        del incometax_diff
-        del combined_diff
-        del adj
-        # return the three marginal tax rate arrays
-        return (mtr_payrolltax, mtr_incometax, mtr_combined)
+        del pitax_chng
+        del pitax_base
+        del pitax_diff
+        # return the marginal tax rate array
+        return mtr_pitax
 
     REQUIRED_REFORM_KEYS = set(['policy'])
     # THE REQUIRED_ASSUMP_KEYS ARE OBSOLETE BECAUSE NO ASSUMP FILES ARE USED
