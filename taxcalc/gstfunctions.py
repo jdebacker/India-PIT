@@ -8,12 +8,17 @@ pitaxcalc-demo functions that calculate GST paid.
 import math
 import copy
 import json
+import os
 import numpy as np
 from taxcalc.decorators import iterate_jit
 
 
 def gst_liability_item(calc):
-    json_data = open('taxcalc/gstrecords_variables_cmie.json').read()
+    # read specified data
+    CUR_PATH = os.path.abspath(os.path.dirname(__file__))
+    GST_RECORDS_FILENAME = 'gstrecords_variables_cmie.json'
+    gst_records_path = os.path.join(CUR_PATH, GST_RECORDS_FILENAME)
+    json_data = open(gst_records_path).read()
     vardict = json.loads(json_data)
     FIELD_VARS = list(k for k, v in vardict['read'].items()
                       if (v['type'] == 'int' or v['type'] == 'float'))
@@ -21,13 +26,13 @@ def gst_liability_item(calc):
     total_consumption_food = np.zeros(len(calc.garray('ID_NO')))
     total_consumption_non_food = np.zeros(len(calc.garray('ID_NO')))
     total_consumption_education = np.zeros(len(calc.garray('ID_NO')))
-    total_consumption_health = np.zeros(len(calc.garray('ID_NO')))    
-    total_consumption = np.zeros(len(calc.garray('ID_NO')))  
+    total_consumption_health = np.zeros(len(calc.garray('ID_NO')))
+    total_consumption = np.zeros(len(calc.garray('ID_NO')))
     gst_food = np.zeros(len(calc.garray('ID_NO')))
     gst_non_food = np.zeros(len(calc.garray('ID_NO')))
     gst_education = np.zeros(len(calc.garray('ID_NO')))
     gst_health = np.zeros(len(calc.garray('ID_NO')))
-    gst = np.zeros(len(calc.garray('ID_NO')))    
+    gst = np.zeros(len(calc.garray('ID_NO')))
     for v in FIELD_VARS:
         category = vardict['read'][v]['category']
         if v.startswith('CONS_'):
@@ -50,14 +55,14 @@ def gst_liability_item(calc):
                 gst_education += gst_item
             elif (category=='HEALTH'):
                 total_consumption_health += cons_item
-                gst_health += gst_item                
+                gst_health += gst_item
     calc.garray('total_consumption_food', total_consumption_food)
     calc.garray('total_consumption_non_food', total_consumption_non_food)
     calc.garray('total_consumption_education', total_consumption_education)
-    calc.garray('total_consumption_health', total_consumption_health)    
-    calc.garray('total_consumption', total_consumption)   
+    calc.garray('total_consumption_health', total_consumption_health)
+    calc.garray('total_consumption', total_consumption)
     calc.garray('gst_food', gst_food)
     calc.garray('gst_non_food', gst_non_food)
     calc.garray('gst_education', gst_education)
     calc.garray('gst_health', gst_health)
-    calc.garray('gst', gst)    
+    calc.garray('gst', gst)
