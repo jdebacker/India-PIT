@@ -158,7 +158,7 @@ class Calculator(object):
             self.increment_year()
         assert self.current_year == year
 
-    def calc_all(self):
+    def calc_all(self, zero_out_calc_vars=False):
         """
         Call all tax-calculation functions for the current_year.
         """
@@ -687,12 +687,12 @@ class Calculator(object):
             self.array('SALARIES', earnings_var + finite_diff)
         elif variable_str == 'SALARIES':
             self.array('SALARIES', seincome_var + finite_diff)
-        # self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
+        self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
         pitax_chng = self.array('pitax')
         # calculate base level of taxes after restoring records object
         self.restore_records()
-        # if not calc_all_already_called or zero_out_calculated_vars:
-        #     self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
+        if not calc_all_already_called or zero_out_calculated_vars:
+            self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
         pitax_base = self.array('pitax')
         # compute marginal changes in combined tax liability
         pitax_diff = pitax_chng - pitax_base
