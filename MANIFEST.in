@@ -1,0 +1,10 @@
+include taxcalc/cti_cross_wgts.csv
+include taxcalc/cti_cross.csv
+include taxcalc/cti_panel_blowup.csv
+include taxcalc/cti_panel.csv
+incldue taxcalc/corprecords_variables.json
+include taxcalc/growfactors.csv
+include taxcalc/policy_current_law.json
+include taxcalc/gst_weights.csv
+include taxcalc/gst_weights1.csv
+include taxcalc/records_variables.json
