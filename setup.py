@@ -3,7 +3,7 @@ versioneer.VCS = 'git'
 versioneer.versionfile_source = 'taxcalc/_version.py'
 versioneer.versionfile_build = 'taxcalc/_version.py'
 versioneer.tag_prefix = ''  # tags are like 1.2.0
-versioneer.parentdir_prefix = 'taxcalc-'  # dirname like 'taxcalc-1.2.0'
+versioneer.parentdir_prefix = 'taxcalc_'  # dirname like 'taxcalc_1.2.0'
 
 try:
     from setuptools import setup
