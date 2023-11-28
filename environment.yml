@@ -12,4 +12,3 @@ dependencies:
 - pycodestyle
 - pylint
 - coverage
-- setuptools==65
