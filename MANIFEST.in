@@ -3,6 +3,7 @@ include taxcalc/cti_cross.csv
 include taxcalc/cti_panel_blowup.csv
 include taxcalc/cti_panel.csv
 include taxcalc/corprecords_variables.json
+include taxcalc/current_law_policy_cmie.json
 include taxcalc/growfactors.csv
 include taxcalc/policy_current_law.json
 include taxcalc/gst_weights.csv
