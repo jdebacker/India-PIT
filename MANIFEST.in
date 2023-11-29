@@ -1,7 +1,7 @@
-include taxcalc/cti_cross_wgts.csv
-include taxcalc/cti_cross.csv
-include taxcalc/cti_panel_blowup.csv
-include taxcalc/cti_panel.csv
+include taxcalc/cit_cross_wgts.csv
+include taxcalc/cit_cross.csv
+include taxcalc/cit_panel_blowup.csv
+include taxcalc/cit_panel.csv
 include taxcalc/corprecords_variables.json
 include taxcalc/current_law_policy_cmie.json
 include taxcalc/current_law_policy_pit_cit.json
